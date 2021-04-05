@@ -1,5 +1,4 @@
-# Discord for utilizing discord's api, time for waiting related functions, asyncpraw to access reddit posts
-# os to access secret variables, random to create a sense of suspense, and importing commands from discord.ext to create
+# Discord for utilizing discord's api, time for waiting related functions, asyncpraw to access reddit posts,  random to create a sense of suspense, and importing commands from discord.ext to create
 # a bot.
 import discord
 import time
