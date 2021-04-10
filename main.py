@@ -152,10 +152,12 @@ async def leavelist(ctx):
 @bot.command()
 # Posts the list of people who have subscribed to getting random kitten images/gifs at random times.
 async def postlist(ctx):
+    posting_list = ' '
     if len(listWithUserIDs) > 0:
         for individual in listWithUserIDs:
             user = await bot.fetch_user(individual)
-            await ctx.channel.send(f"+ {user.display_name}")
+            posting_list += "+ " + user.display_name + "\n"    
+        await ctx.channel.send(posting_list)
     else:
         await ctx.channel.send(f"I don't have a list of people to send kittens to :( I'm sad now.")
 
@@ -251,10 +253,12 @@ async def on_ready():
     with open('user_ids.txt') as file_object:
         lines = file_object.readlines()
 
+    joining_users = ''
     for line in lines:
         listWithUserIDs.append(int(line))
         user = await bot.fetch_user( int(line) )
-        print(f" {user.display_name}'s ID has been pulled from the txt file")
+        joining_users += f"{user.display_name}'s ID has been pulled from the txt file.\n"
+    print(joining_users)
 
     print("Loaded IDs")
     game = discord.Game("with Doggo Bot")
