@@ -117,6 +117,7 @@ async def joinlist(ctx): # A guy named indra in the python discord is the reason
         await ctx.channel.send(f"{ctx.author.name}, you have been added to the list! :D (NOTE: Make sure your privacy settings allow DMs from both the bot and the server you use this command in otherwise the bot will break!") 
         # Sends a message to let them know they've been added.
 
+
 @bot.command()
  # Command to add in multiple user IDs with a tuple
 async def joinlistmultiple(ctx, *user_ids_to_enter):
@@ -126,10 +127,13 @@ async def joinlistmultiple(ctx, *user_ids_to_enter):
             await user.send(f"{user.display_name} is already in the list! .-. ")
             print(user_ids_to_enter)
         else:
-            listWithUserIDs.append(int(id)) # Adds the ID to the list
-            with open(fileWithIDs, 'a') as file_object: # Add to the txt file
-                file_object.write( f"{ id }\n")
-                await user.send(f"This is to let you know you've been added into the list! :D If you would like to leave, be sure to use !leavelist ")
+            try:
+                await user.send(f"This is to let you know you've been added into the list! :D If you would like to leave, be sure to use !leavelist")
+                listWithUserIDs.append(int(id)) # Adds the ID to the list
+                with open(fileWithIDs, 'a') as file_object: # Appends to the txt file
+                    file_object.write( f"{ id }\n")
+            except discord.Forbidden:
+                await ctx.channel.send(f"Either they don't share a server with me, or I'm blocked by them :( I can't add {user.display_name}")
         
 
 
@@ -144,7 +148,7 @@ async def leavelist(ctx):
             file_object.write('')
 
         for id in listWithUserIDs:
-            with open(fileWithIDs, 'a') as file_object: # Add to the txt file
+            with open(fileWithIDs, 'a') as file_object: # Adds everyone else who is still in the file.
                 file_object.write( f"{ id }\n")
     else:
         await ctx.send(f" {await bot.fetch_user(ctx.author.id)} isn't in the list!")
@@ -164,8 +168,10 @@ async def postlist(ctx):
 @bot.command()
 # Posts the dictionary of commands instantiated at the beginning of this file.
 async def postcommands(ctx):
+    command_list = ''
     for command_name, command_desc in list_of_commands.items():
-        await ctx.channel.send(f"{command_name} : {command_desc}")
+        command_list += command_name + " : " + command_desc + "\n"
+    await ctx.channel.send(command_list)
 
 
 @bot.command()
@@ -185,7 +191,11 @@ async def say(ctx, *message):
     messagetosend = ""
     for word in message:
             messagetosend += " " + word
-    await ctx.channel.send(messagetosend)
+    if '@everyone' in message:
+        await ctx.channel.send(f"{ctx.author} has used an everyone ping!")
+    else:
+        await ctx.channel.send(messagetosend)
+        await ctx.message.delete()
 
 @bot.command()
 async def announcement(ctx, *message):
@@ -216,13 +226,24 @@ async def resetlist(ctx):
     else:
         await ctx.channel.send("You do not have access to this command.")
 
-@tasks.loop(minutes=45)
-async def randomkittens():  # This task gives folks in the list a random kitten image every 45 minutes.
+@bot.command()
+async def listservers(ctx):
+    # Lists the names of servers that Kitten Bot is in.
+    if ctx.author.id == 265596926857183252:      
+        server_list = ' '
+        for server in bot.guilds:
+            server_list += f"+ {server.name}\n"  
+        await ctx.channel.send(server_list)
+    else:
+        await ctx.channel.send("You do not have access to this command.")	
+
+# Tasks
+@tasks.loop(minutes=60)
+async def randomkittens(): # This task gives folks in the list a random kitten image every 60 minutes.
     for user_id in listWithUserIDs: 
         user = await bot.fetch_user(user_id)
 
         randomNumber = random.randint(1, 3)
-        
         if randomNumber == 1:
             subreddit = await reddit.subreddit("IllegallySmolCats")
 #        elif randomNumber == 2:
@@ -236,12 +257,41 @@ async def randomkittens():  # This task gives folks in the list a random kitten 
 
 
         submission = await subreddit.random()
-        await user.send("Because you've been patient and a good person, have a kitten! ^-^")
 
-        while 'v.redd.it' in submission.url or 'gallery' in submission.url:
+        while 'v.redd.it' in submission.url or 'gallery' in submission.url or 'youtu.be' in submission.url or 'comments' in submission.url:
             submission = await subreddit.random()
         else:
-            await user.send(submission.url)
+            try:
+                await user.send("Because you've been patient and a good person, have a kitty! ^-^")
+                await user.send(submission.url)
+                print(f"{user.display_name} has been sent a picture.")
+	
+            except discord.Forbidden:
+                owner = await bot.fetch_user(265596926857183252)	
+                await owner.send(f"{user.display_name} has errored. Removing from the list.")
+	
+                if user.id in listWithUserIDs:
+                    listWithUserIDs.remove(user.id)
+                    with open('user_ids.txt', 'w') as file_object: # Resets the file
+                            file_object.write('')
+                    
+                    for id in listWithUserIDs:
+                        with open(fileWithIDs, 'a') as file_object: # Add to the txt file
+                            file_object.write( f"{ id }\n")
+
+@bot.event
+# Saying kitten bot will doom you to a breakfast with cookies and milk.
+async def on_message(message):
+    if "kitten bot" in message.content.lower():
+        game = discord.Game(f"I see you, {message.author}")
+        await bot.change_presence(status = discord.Status.do_not_disturb, activity=game)
+        with open('victims.txt', 'a') as file_object:
+            file_object.write(f"{message.author} incurred the wrath of Kitten Bot at {datetime.datetime.now()}\n")
+        time.sleep(1)
+        game = discord.Game("with Doggo Bot")
+        await bot.change_presence(status = discord.Status.online, activity=game)
+        
+    await bot.process_commands(message)
 
 
 @bot.event
