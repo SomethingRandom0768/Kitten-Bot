@@ -13,30 +13,15 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 fileWithIDs = 'user_ids.txt'
 
 # Accessing Reddit's API, this stuff is supposed to be secret.
-reddit = asyncpraw.Reddit(client_id=(#INSERTCLIENTID,
-client_secret=(#INSERTCLIENTSECRET, 
-user_agent=#INSERTUSERAGENT
+reddit = asyncpraw.Reddit(client_id=(#INSERTCLIENTID),
+client_secret=(#INSERTCLIENTSECRET), 
+user_agent=(#INSERTUSERAGENT)
 
 # This is for the list of individuals in the list to receive kitty images.
 listWithUserIDs = []
 
-list_of_commands = {
-    'announcement': "[Command reserved for SomethingRandom] If SomethingRandom finds something worthy to send all of the people in the list, he'll send it using this command!",
-    'getmultiplekitties [insert number]':"One kitty isn't enough? You can ask for more!",   
-	'getsinglekitty':'returns a kitty pic or gif!',
-    'help': 'Just sends a giant list of all the commands if you need to read them without their descriptions!',
-    'joinlist':"allows you to join the folks who'll get a kitty every 45 minutes!",
-    'joinlistmultiple [insert IDs with spaces in between]': "allows you to add multiple folks into the list provided you know their user IDs",
-    'leavelist':"allows you to leave the list on your own",
-    'petbot':"Feel like petting the bot? Do so with this command!",
-    'pokeyourself':"Was originally a test function, now is just used to poke yourself if you feel like it",
-    'postcommands': "You used this command to read this! Lists out all of kitten bot's commands with a description",
-    'postlist':"posts the people in the list of people, use it to make sure you're in it!",
-    'resetlist':"[Command reserved for SomethingRandom] Used to reset the list for testing purposes.",
-    'say': "If you'd like to speak as the kitten bot, this the command to do it with (Note: You have to delete your own message using this command for full effect",
-    "sendkittenstochina": "Joke command to send all of Kitten Bot's siblings to China"  
-}
-
+# Counter to prevent people from spamming amogus command.
+amogus_counter = 0 
 
 @bot.command()
 # This command is used to obtain a single kitten gif or image by utilizing PRAW to retrieve a url.
@@ -66,6 +51,10 @@ async def getsinglekitty(ctx):
     else:
         await ctx.channel.send(submission.url)
 
+@bot.command() 
+ async def sendbigkitty(ctx):
+     # Sends a giant kitty.
+     await ctx.send('https://cdn.discordapp.com/attachments/837418361696288828/837433194055598110/image0.jpg')
 
 @bot.command()
 # Command to ask for multiple cats, limit is 15
@@ -168,10 +157,11 @@ async def postlist(ctx):
 @bot.command()
 # Posts the dictionary of commands instantiated at the beginning of this file.
 async def postcommands(ctx):
-    command_list = ''
-    for command_name, command_desc in list_of_commands.items():
-        command_list += command_name + " : " + command_desc + "\n"
-    await ctx.channel.send(command_list)
+    with open('commands_list.json') as commands_file:
+        cmds = json.load(commands_file)
+        commands_embed = discord.Embed.from_dict(cmds)
+
+    await ctx.channel.send(embed=commands_embed)
 
 
 @bot.command()
@@ -193,9 +183,15 @@ async def say(ctx, *message):
             messagetosend += " " + word
     if '@everyone' in message:
         await ctx.channel.send(f"{ctx.author} has used an everyone ping!")
-    else:
-        await ctx.channel.send(messagetosend)
+    elif 'sus' in message:
+        await ctx.channel.send("You do not have those privileges. LOOOOOOL")
         await ctx.message.delete()
+    else:
+        try:
+            await ctx.channel.send(messagetosend)
+            await ctx.message.delete()
+        except discord.errors.HTTPException:
+            await ctx.channel.send("Cannot send an empty message.")
 
 @bot.command()
 async def announcement(ctx, *message):
