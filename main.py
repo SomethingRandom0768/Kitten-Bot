@@ -25,31 +25,28 @@ amogus_counter = 0
 
 @bot.command()
 # This command is used to obtain a single kitten gif or image by utilizing PRAW to retrieve a url.
-# r/kittengifs and r/kittens are privated at the moment
 async def getsinglekitty(ctx):
-    randomNumber = random.randint(1, 4)
-    if randomNumber == 1:
-        subreddit = await reddit.subreddit("IllegallySmolCats")
-#    elif randomNumber == 2:
-#        subreddit = await reddit.subreddit("kittengifs")
-    elif randomNumber == 2:
-        subreddit = await reddit.subreddit("Blep")
-    elif randomNumber == 3:
-        subreddit = await reddit.subreddit('cats')
-#    else:
-#        subreddit = await reddit.subreddit("kittens")
+    # Chooses a random subreddit from listWithSubreddits
+    randomSubreddit = random.choice(listOfSubreddits)
+    chosenSubreddit = await reddit.subreddit(randomSubreddit)
 
-    submission = await subreddit.random()
+    submission = await chosenSubreddit.random()
     await ctx.channel.send("Obtaining submission")
 	
-    while 'v.redd.it' in submission.url or 'gallery' in submission.url:
+    while 'v.redd.it' in submission.url or 'gallery' in submission.url or 'youtu.be' in submission.url or 'youtube' in submission.url:
         print(submission.url)
         await ctx.channel.send("This URL doesn't work right :( trying again",
                                delete_after=2)
-        submission = await subreddit.random()
+        submission = await chosenSubreddit.random()
         time.sleep(2)
     else:
-        await ctx.channel.send(submission.url)
+        print(submission.url)
+        redditLink = "https://www.reddit.com/" + submission.permalink
+        messageEmbed = discord.Embed(author='Kitten Bot(!)#4954', colour=3447003, title="Here's a cat, just for you! ^-^")
+        messageEmbed.add_field(name='Post Information', value=f"This post was created by reddit user {submission.author} which can be found [here]({redditLink})")
+        messageEmbed.set_footer(text="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
+        messageEmbed.set_image(url=submission.url)
+        await ctx.channel.send(embed=messageEmbed)
 
 @bot.command() 
  async def sendbigkitty(ctx):
@@ -63,35 +60,21 @@ async def getmultiplekitties(ctx, number):
         await ctx.send("That's too many! Please do fewer than 16 :( it makes me tired.")
     else:
         number = int(number)
-
     for i in range(0, number):
-        randomNumber = random.randint(1, 3)
-
-        if randomNumber == 1:
-            subreddit = await reddit.subreddit("IllegallySmolCats")
-#        elif randomNumber == 2:
-#            subreddit = await reddit.subreddit("kittengifs")
-        elif randomNumber == 2:
-            subreddit = await reddit.subreddit("Blep")
-        elif randomNumber == 3:
-            subreddit = await reddit.subreddit('cats')
-        
-           # subreddit = await reddit.subreddit("kittens")
-
+        subreddit = await reddit.subreddit(random.choice(listOfSubreddits))
         submission = await subreddit.random()
-        await ctx.channel.send(f"Obtaining submission ({i+1} of {number})")
-        time.sleep(2)
 
-        while 'v.redd.it' in submission.url or 'gallery' in submission.url or 'youtu.be' in submission.url:
+        while 'v.redd.it' in submission.url or 'gallery' in submission.url or 'youtu.be' in submission.url or 'youtube' in submission.url:
             print(submission.url)
-            await ctx.channel.send(
-                "This URL doesn't work right :( trying again", delete_after=2)
             submission = await subreddit.random()
+            time.sleep(1)
         else:
-            await ctx.channel.send(submission.url)
-
-    await ctx.channel.send(f"I'm ready again! ^-^")
-
+            redditLink = "https://www.reddit.com/" + submission.permalink
+            messageEmbed = discord.Embed(author='Kitten Bot(!)#4954', colour=3447003, title=f"Here's a cat, just for you! ^-^ ({i+1} of {number})")
+            messageEmbed.add_field(name='Post Information', value=f"This post was created by reddit user {submission.author} which can be found [here]({redditLink})")
+            messageEmbed.set_footer(text="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
+            messageEmbed.set_image(url=submission.url)
+            await ctx.channel.send(embed=messageEmbed)
 
 @bot.command()
 # Command to join the list for kittens
@@ -234,46 +217,39 @@ async def listservers(ctx):
         await ctx.channel.send("You do not have access to this command.")	
 
 # Tasks
-@tasks.loop(minutes=60)
-async def randomkittens(): # This task gives folks in the list a random kitten image every 60 minutes.
-    for user_id in listWithUserIDs: 
-        user = await bot.fetch_user(user_id)
-
-        randomNumber = random.randint(1, 3)
-        if randomNumber == 1:
-            subreddit = await reddit.subreddit("IllegallySmolCats")
-#        elif randomNumber == 2:
-#            subreddit = await reddit.subreddit("kittengifs")
-        elif randomNumber == 2:
-            subreddit = await reddit.subreddit("Blep")
-        elif randomNumber == 3:
-            subreddit = await reddit.subreddit('cats')
-       # else:
-           # subreddit = await reddit.subreddit("kittens")
-
-
-        submission = await subreddit.random()
-
-        while 'v.redd.it' in submission.url or 'gallery' in submission.url or 'youtu.be' in submission.url or 'comments' in submission.url:
+@tasks.loop(seconds=1)
+async def checkTime():
+    current_time = datetime.datetime.now()
+    if current_time.minute == 0 and current_time.second == 0:
+        for user_id in listWithUserIDs:
+            user = await bot.fetch_user(user_id)
+            subreddit = await reddit.subreddit(random.choice(listOfSubreddits))
             submission = await subreddit.random()
-        else:
-            try:
-                await user.send("Because you've been patient and a good person, have a kitty! ^-^")
-                await user.send(submission.url)
-                print(f"{user.display_name} has been sent a picture.")
-	
-            except discord.Forbidden:
-                owner = await bot.fetch_user(265596926857183252)	
-                await owner.send(f"{user.display_name} has errored. Removing from the list.")
-	
-                if user.id in listWithUserIDs:
-                    listWithUserIDs.remove(user.id)
-                    with open('user_ids.txt', 'w') as file_object: # Resets the file
+
+            while 'v.redd.it' in submission.url or 'gallery' in submission.url or 'youtu.be' in submission.url or 'comments' in submission.url:
+                submission = await subreddit.random()
+            else:
+                try:
+                    redditLink = "https://www.reddit.com/" + submission.permalink
+                    messageEmbed = discord.Embed(author='Kitten Bot(!)#4954', colour=3447003, title=f"Here's your hourly kitty!")
+                    messageEmbed.add_field(name='Post Information', value=f"This post was created by reddit user {submission.author} which can be found [here]({redditLink})")
+                    messageEmbed.set_footer(text="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
+                    messageEmbed.set_image(url=submission.url)
+                
+                    await user.send(embed=messageEmbed)
+
+                    print(f"{user.display_name} has been sent a picture.")
+                except discord.Forbidden:
+                    owner = await bot.fetch_user(265596926857183252)
+                    await owner.send(f"{user.display_name} has errored. Removing from the list.")
+                    if user.id in listWithUserIDs:
+                        listWithUserIDs.remove(user.id)
+                        with open('user_ids.txt','w') as file_object:  # Resets the file
                             file_object.write('')
-                    
-                    for id in listWithUserIDs:
-                        with open(fileWithIDs, 'a') as file_object: # Add to the txt file
-                            file_object.write( f"{ id }\n")
+
+                        for id in listWithUserIDs:
+                            with open(fileWithIDs,'a') as file_object:  # Add to the txt file
+                                file_object.write(f"{ id }\n")
 
 @bot.event
 # Saying kitten bot will doom you to a breakfast with cookies and milk.
@@ -309,6 +285,6 @@ async def on_ready():
     print("Loaded IDs")
     game = discord.Game("with Doggo Bot")
     await bot.change_presence(status=discord.Status.online,activity=game)
-    await randomkittens.start()
+    await checkTime.start()
 
 bot.run(#INSERTDISCORDTOKEN)
