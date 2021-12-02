@@ -321,7 +321,7 @@ async def on_ready():
     print("Loaded all IDs")
 
     game = discord.Game("with a ball of yarn, mew!")
-    await bot.change_presence(status=discord.Status.do_not_disturb,activity=game)
+    await bot.change_presence(status=discord.Status.online, activity=game)
 
     await checkTime.start()
 
