@@ -1,0 +1,92 @@
+{
+    "title": "Kitten Bot's Command List",
+
+    "color": 3447003,
+    "author": {
+        "name": "Kitten Bot",
+        "icon_url": "https://cdn.discordapp.com/avatars/802612621849002012/3e5774bb096c856d0d11ccf746c8266e.png?size=128"
+    },
+
+    "fields" : [
+        {
+            "name" : "amogus",
+            "value" : "Posts the among us copypasta" 
+        },
+
+        {
+            "name" : "announcement",
+            "value" : "[Command reserved for SomethingRandom] If SomethingRandom finds something worthy to send all of the people in the list, he'll send it using this command!"
+        },
+
+        {
+            "name" : "getmultiplekitties [insert number]",
+            "value" : "One kitty isn't enough? You can ask for more! (limit is 16)"
+        },
+
+        {
+            "name" : "getsinglekitty",
+            "value" : "returns a kitty pic or gif!"
+        },
+
+        {
+            "name" : "help",
+            "value" : "Just sends a giant list of all the commands if you need to read them without their descriptions! (Comes with every Discord bot)"
+
+        },
+
+        {
+            "name" : "joinlist",
+            "value" : "allows you to join the folks who'll get a kitty every 45 minutes!"
+        },
+
+        {
+            "name" : "leavelist",
+            "value" : "allows you to leave the list on your own"
+        },
+
+        {
+            "name" : "petbot",
+            "value" : "Feel like petting the bot? Do so with this command!"
+        },
+
+        {
+            "name" : "pokeyourself",
+            "value" : "Was originally a test function, now is just used to poke yourself if you feel like it"
+        },
+        
+        {
+            "name" : "postcommands",
+            "value" : "You used this command to read this! Lists out all of kitten bot's commands with a description"
+        },
+
+        {
+            "name" : "postlist",
+            "value" : "posts the people in the list of people, use it to make sure you're in it!"
+        },
+
+        {
+            "name" : "resetlist",
+            "value" : "[Command reserved for SomethingRandom] Used to reset the list for testing purposes."
+        },
+
+        {
+            "name" : "say",
+            "value" : "If you'd like to speak as the kitten bot, this the command to do it with"
+        },
+
+        {
+            "name" : "sendbigkitty",
+            "value" : "sends a big cat"
+        },
+
+        {
+            "name" : "sendkittenstochina",
+            "value" : "Joke command to send all of Kitten Bot's siblings to China"
+        }
+
+
+    ]
+    
+   
+
+}
