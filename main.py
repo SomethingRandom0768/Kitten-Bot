@@ -3,7 +3,7 @@
 # a bot.
 
 import asyncprawcore
-import discord
+from discord import * 
 import datetime
 import time
 import asyncpraw
@@ -321,7 +321,7 @@ async def on_ready():
     print("Loaded all IDs")
 
     game = discord.Game("with a ball of yarn, mew!")
-    await bot.change_presence(status=discord.Status.idle,activity=game)
+    await bot.change_presence(status=discord.Status.do_not_disturb,activity=game)
 
     await checkTime.start()
 
