@@ -293,7 +293,7 @@ async def checkTime():
                         file_object.write('')
 
                     for id in listWithUserIDs:
-                        with open(fileWithIDs,'a') as file_object:  # Add to the txt file
+                        with open(fileWithIDs,'a') as file_object:  # Add everyone left in the list to the txt file
                             file_object.write(f"{ id }\n")
                     
 # Bot events start here
@@ -308,7 +308,7 @@ async def on_message(message):
             file_object.write(f"{message.author} incurred the wrath of Kitten Bot at {datetime.datetime.now()}\n")
         time.sleep(1)
         game = discord.Game("with a ball of yarn, mew!")
-        await bot.change_presence(status=discord.Status.idle, activity=game)
+        await bot.change_presence(status=discord.Status.online, activity=game)
 
     await bot.process_commands(message)
 
@@ -318,17 +318,7 @@ async def on_ready():
     into listWithUserIDs so as to keep the list filled with whatever was inside it before.
     It'll then set playing status and start the loop of giving cats every 45 minutes."""
 
-    with open(fileWithIDs) as file_object:
-        lines = file_object.readlines()
-
-    joining_users = ''
-    for line in lines:
-        listWithUserIDs.append(int(line))
-        user = await bot.fetch_user(int(line))
-        joining_users += f"{user.display_name}'s ID has been pulled from the txt file.\n"
-    print(joining_users)
-
-    print("Loaded IDs")
+    print("Loaded all IDs")
 
     game = discord.Game("with a ball of yarn, mew!")
     await bot.change_presence(status=discord.Status.idle,activity=game)
