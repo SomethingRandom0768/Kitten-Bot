@@ -38,31 +38,25 @@ amogus_counter = 0
 
 owner_id = 265596926857183252
 
+def createEmbed(submission):
+     redditLink = "https://www.reddit.com/" + submission.permalink
+     messageEmbed = discord.Embed(colour=3447003, title="Here's a cat, just for you! ^-^")
+     messageEmbed.add_field(name='Post Information', value=f"This post was created by reddit user {submission.author} which can be found [here]({redditLink})")
+     messageEmbed.set_footer(text="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
+     messageEmbed.set_image(url=submission.url)
+     return messageEmbed
+
 # BOT COMMANDS start here
 
 @bot.command()
 # This command is used to obtain a single kitten gif or image by utilizing PRAW to retrieve a url.
 async def getsinglekitty(ctx):
-    # Chooses a random subreddit from listWithSubreddits
+    # Chooses a random subreddit from listWithSubreddits, uses createEmbed and then sends it to the individual who asked for it.
     randomSubreddit = random.choice(listOfSubreddits)
     chosenSubreddit = await reddit.subreddit(randomSubreddit)
-
-    submission = await chosenSubreddit.random()
-    await ctx.channel.send("Obtaining submission")
-	
-    while 'v.redd.it' in submission.url or 'gallery' in submission.url or 'youtu.be' in submission.url or 'youtube' in submission.url:
-        print(submission.url)
-        await ctx.channel.send("This URL doesn't work right :( trying again", delete_after=2)
-        submission = await chosenSubreddit.random()
-        time.sleep(2)
-    else:
-        print(submission.url)
-        redditLink = "https://www.reddit.com/" + submission.permalink
-        messageEmbed = discord.Embed(colour=3447003, title="Here's a cat, just for you! ^-^")
-        messageEmbed.add_field(name='Post Information', value=f"This post was created by reddit user {submission.author} which can be found [here]({redditLink})")
-        messageEmbed.set_footer(text="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
-        messageEmbed.set_image(url=submission.url)
-        await ctx.channel.send(embed=messageEmbed)
+    submission = await chosenSubreddit.random()	
+    single_kitty_embed = createEmbed(submission)
+    await ctx.channel.send(embed=single_kitty_embed)
 
 
 @bot.command()
@@ -75,19 +69,8 @@ async def getmultiplekitties(ctx, number):
     for i in range(0, number):
         subreddit = await reddit.subreddit(random.choice(listOfSubreddits))
         submission = await subreddit.random()
-
-        while 'v.redd.it' in submission.url or 'gallery' in submission.url or 'youtu.be' in submission.url or 'youtube' in submission.url:
-            print(submission.url)
-            submission = await subreddit.random()
-            time.sleep(1)
-        else:
-            redditLink = "https://www.reddit.com/" + submission.permalink
-            messageEmbed = discord.Embed(colour=3447003, title=f"Here's a cat, just for you! ^-^ ({i+1} of {number})", footer="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
-            messageEmbed.add_field(name='Post Information', value=f"This post was created by reddit user {submission.author} which can be found [here]({redditLink})")
-            messageEmbed.set_footer(text="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
-            messageEmbed.set_image(url=submission.url)
-            await ctx.channel.send(embed=messageEmbed)
-            time.sleep(1)
+        multiple_kitty_embed = createEmbed(submission)
+        await ctx.channel.send(embed=multiple_kitty_embed)
 
 
 @bot.command()
@@ -170,14 +153,12 @@ async def postcommands(ctx):
 @bot.command()
 # If you want to pet the kitten bot
 async def petbot(ctx):
-    await ctx.channel.send(
-        f"Mew! {ctx.message.author}, thank you for petting me! ^-^")
+    await ctx.channel.send(f"Mew! {ctx.message.author}, thank you for petting me! ^-^")
 
 @bot.command()
 # joke command, not meant to be anything serious
 async def sendkittenstochina(ctx):
-    await ctx.channel.send(
-        f"Mew mew mew!!!! Sending my brothers and sisters to China! ^-^")
+    await ctx.channel.send(f"Mew mew mew!!!! Sending my brothers and sisters to China! ^-^")
 
 
 @bot.command()
@@ -272,14 +253,8 @@ async def checkTime():
                     await owner.send( f"{subreddit.display_name} has crashed!")
                         
             try:
-                redditLink = "https://www.reddit.com/" + submission.permalink
-                messageEmbed = discord.Embed(colour=3447003, title=f"Here's your kitty!")
-                messageEmbed.add_field(name='Post Information', value=f"This post was created by reddit user {submission.author} which can be found [here]({redditLink})")
-                messageEmbed.set_footer(text="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
-                messageEmbed.set_image(url=submission.url)
-                
-                await user.send(embed=messageEmbed)
-
+                kitty_embed = createEmbed(submission)    
+                await user.send(embed=kitty_embed)
                 print(f"{user.display_name} has been sent a picture.")
 
             except discord.Forbidden:
@@ -326,12 +301,10 @@ async def on_ready():
         user = await bot.fetch_user( int(line) )
         joining_users += f"{user.display_name}'s ID has been pulled from the txt file.\n"
     print(joining_users)
-
     print("Loaded all IDs")
-
+    print("Live is UP! :D")
     game = discord.Game("with a ball of yarn, mew!")
     await bot.change_presence(status=discord.Status.online, activity=game)
-
     await checkTime.start()
 
 bot.run(secret_variables.discord_token)
