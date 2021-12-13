@@ -257,7 +257,7 @@ async def listservers(ctx):
 @tasks.loop(seconds=1)
 async def checkTime():
     current_time = datetime.datetime.now()
-    if current_time.minute == 0 and current_time.second == 0:
+    if (current_time.minute == 0 and current_time.second == 0) or (current_time.minute == 30 and current_time.second ==0):
         for user_id in listWithUserIDs:
             user = await bot.fetch_user(user_id)
             subreddit = await reddit.subreddit(random.choice(listOfSubreddits))
@@ -266,15 +266,14 @@ async def checkTime():
                 submission = await subreddit.random()
             except asyncprawcore.exceptions.Forbidden as error:
                 with open('crash_log.txt', 'w') as file_object: # Write to the crash log if this is the case.
-                        pass
-                        file_object.write(f"{error} + \nSubreddit crashing name: {subreddit.display_name}")
-                        print("Encountered a Forbidden error!")
-                        owner = await bot.fetch_user(owner_id)
-                        await owner.send( f"{subreddit.display_name} has crashed!")
+                    file_object.write(f"{error} + \nSubreddit crashing name: {subreddit.display_name}")
+                    print("Encountered a Forbidden error!")
+                    owner = await bot.fetch_user(owner_id)
+                    await owner.send( f"{subreddit.display_name} has crashed!")
                         
             try:
                 redditLink = "https://www.reddit.com/" + submission.permalink
-                messageEmbed = discord.Embed(colour=3447003, title=f"Here's your hourly kitty!")
+                messageEmbed = discord.Embed(colour=3447003, title=f"Here's your kitty!")
                 messageEmbed.add_field(name='Post Information', value=f"This post was created by reddit user {submission.author} which can be found [here]({redditLink})")
                 messageEmbed.set_footer(text="If the image/gif/video fails, feel free to click the blue link to see what would've been posted :D")
                 messageEmbed.set_image(url=submission.url)
@@ -304,7 +303,7 @@ async def on_message(message):
     if "kitten bot" in message.content.lower():
         game = discord.Game(f"I see you, {message.author}")
         await bot.change_presence(status=discord.Status.do_not_disturb, activity=game)
-        with open('victims.txt', 'a') as file_object:
+        with open('dev/victims.txt', 'a') as file_object:
             file_object.write(f"{message.author} incurred the wrath of Kitten Bot at {datetime.datetime.now()}\n")
         time.sleep(1)
         game = discord.Game("with a ball of yarn, mew!")
@@ -317,6 +316,16 @@ async def on_ready():
     """What the bot will do here is read over user_ids.txt and then append each id
     into listWithUserIDs so as to keep the list filled with whatever was inside it before.
     It'll then set playing status and start the loop of giving cats every 45 minutes."""
+
+    with open(fileWithIDs) as file_object:
+        lines = file_object.readlines()
+
+    joining_users = ''
+    for line in lines:
+        listWithUserIDs.append(int(line))
+        user = await bot.fetch_user( int(line) )
+        joining_users += f"{user.display_name}'s ID has been pulled from the txt file.\n"
+    print(joining_users)
 
     print("Loaded all IDs")
 
