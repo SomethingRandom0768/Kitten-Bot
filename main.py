@@ -3,7 +3,7 @@
 # a bot.
 
 import asyncprawcore
-from discord import * 
+import discord
 import datetime
 import time
 import asyncpraw
