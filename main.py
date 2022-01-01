@@ -163,7 +163,7 @@ async def sendkittenstochina(ctx):
 
 @bot.command()
 async def say(ctx, *message):
-    # Allows users to speak as the kitten bot, although they will need to delete their own message as quickly as possible.
+    # Allows users to speak as the kitten bot
     messagetosend = ""
     for word in message:
         messagetosend += " " + word
